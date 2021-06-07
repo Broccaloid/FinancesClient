@@ -1,0 +1,51 @@
+﻿@page "/expenses"
+
+@using FinancesClient.Data
+@using Microsoft.Extensions.Configuration
+@using System.Net.Http;
+@inject IConfiguration Configuration
+
+<h1>All expenses</h1>
+
+@if (operations == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>BalanceChange</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var operation in operations)
+            {
+                <tr>
+                    <td>@operation.Date.ToShortDateString()</td>
+                    <td>@operation.Type</td>
+                    <td>@operation.BalanceChange</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<FinancialOperation> operations;
+    private HttpClient Http { get; set; } = new HttpClient();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllExpenses")["Uri"]);
+        Http.BaseAddress = uri;
+        HttpResponseMessage response = await Http.GetAsync("");
+        if (response.IsSuccessStatusCode)
+        {
+            operations = response.Content.ReadAsAsync<List<FinancialOperation>>().Result;
+        }
+    }
+}
