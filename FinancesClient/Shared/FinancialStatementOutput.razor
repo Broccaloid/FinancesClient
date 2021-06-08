@@ -1,0 +1,29 @@
+﻿@using FinancesClient.Data
+
+<p>Total income = @Statement.TotalIncome</p>
+<p>Total expenses = @Statement.TotalExpense</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>BalanceChange</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var operation in Statement.FinancialOperations)
+        {
+            <tr>
+                <td>@operation.Date.ToShortDateString()</td>
+                <td>@operation.Type</td>
+                <td>@operation.BalanceChange</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public FinancialStatement Statement { get; set; }
+}
+

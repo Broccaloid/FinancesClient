@@ -1,0 +1,45 @@
+﻿@page "/dailyfinancialstatement"
+
+@using Microsoft.Extensions.Configuration
+@using System.Net.Http;
+@inject IConfiguration Configuration
+
+<h1>Daily Financial Statement</h1>
+
+@if (statement == null)
+{
+    <h3>Plese, enter a date</h3>
+    <br />
+    <p>Date</p>
+    <input @bind="@date" type="date" />
+    <br />
+    <br />
+    <button @onclick="GetFinancialStatement">Get Financial Statement</button>
+}
+else
+{
+    <FinancialStatementOutput Statement="@statement" />
+}
+
+@code {
+    private Data.FinancialStatement statement;
+    private HttpClient Http { get; set; } = new HttpClient();
+    private IConfigurationSection dateParameters;
+    private DateTime date;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("DailyFinancialStatement")["Uri"]);
+        dateParameters = Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("DailyFinancialStatement").GetSection("Parameters");
+        Http.BaseAddress = uri;
+    }
+
+    private async Task GetFinancialStatement()
+    {
+        HttpResponseMessage response = await Http.GetAsync($"?{dateParameters["Date"]}{date}");
+        if (response.IsSuccessStatusCode)
+        {
+            statement = response.Content.ReadAsAsync<Data.FinancialStatement>().Result;
+        }
+    }
+}

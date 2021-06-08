@@ -1,0 +1,48 @@
+﻿@page "/financialstatement"
+
+@using Microsoft.Extensions.Configuration
+@using System.Net.Http;
+@inject IConfiguration Configuration
+
+<h1>Financial Statement</h1>
+
+@if (statement == null)
+{
+    <h3>Plese, enter a date range</h3>
+    <br />
+    <p>Date start</p>
+    <input @bind="@dateStart" type="date" />
+    <br />
+    <p>Date end</p>
+    <input @bind="@dateEnd" type="date" />
+    <br /><br />
+    <button @onclick="GetFinancialStatement">Get Financial Statement</button>
+}
+else
+{
+    <FinancialStatementOutput Statement="@statement" />
+}
+
+@code {
+    private Data.FinancialStatement statement;
+    private HttpClient Http { get; set; } = new HttpClient();
+    private IConfigurationSection dateRangeParameters;
+    private DateTime dateStart;
+    private DateTime dateEnd;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("FinancialStatement")["Uri"]);
+        dateRangeParameters = Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("FinancialStatement").GetSection("Parameters");
+        Http.BaseAddress = uri;
+    }
+
+    private async Task GetFinancialStatement()
+    {
+        HttpResponseMessage response = await Http.GetAsync($"?{dateRangeParameters["DateStart"]}{dateStart}&{dateRangeParameters["DateEnd"]}{dateEnd}");
+        if (response.IsSuccessStatusCode)
+        {
+            statement = response.Content.ReadAsAsync<Data.FinancialStatement>().Result;
+        }
+    }
+}

@@ -1,4 +1,4 @@
-﻿@page "/expenses"
+﻿@page "/incomes"
 
 @using FinancesClient.Data
 @using Microsoft.Extensions.Configuration
@@ -13,7 +13,7 @@
 }
 else
 {
-    <OutputTable Operations="@operations"/>
+    <OutputTable Operations="@operations" />
 }
 
 @code {
@@ -22,7 +22,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllExpenses")["Uri"]);
+        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllIncomes")["Uri"]);
         Http.BaseAddress = uri;
         HttpResponseMessage response = await Http.GetAsync("");
         if (response.IsSuccessStatusCode)
