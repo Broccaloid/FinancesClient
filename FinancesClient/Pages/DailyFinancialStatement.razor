@@ -1,8 +1,7 @@
 ﻿@page "/dailyfinancialstatement"
 
-@using Microsoft.Extensions.Configuration
-@using System.Net.Http;
-@inject IConfiguration Configuration
+@using FinancesClient.Services
+@inject IFinancesService FinancesService 
 
 <h1>Daily Financial Statement</h1>
 
@@ -23,23 +22,16 @@ else
 
 @code {
     private Data.FinancialStatement statement;
-    private HttpClient Http { get; set; } = new HttpClient();
-    private IConfigurationSection dateParameters;
     private DateTime date;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("DailyFinancialStatement")["Uri"]);
-        dateParameters = Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("DailyFinancialStatement").GetSection("Parameters");
-        Http.BaseAddress = uri;
-    }
 
     private async Task GetFinancialStatement()
     {
-        HttpResponseMessage response = await Http.GetAsync($"?{dateParameters["Date"]}{date}");
-        if (response.IsSuccessStatusCode)
+        try
         {
-            statement = response.Content.ReadAsAsync<Data.FinancialStatement>().Result;
+            statement = await FinancesService.GetDailyFinancialStatement(date);
+        }
+        catch (Exception)
+        {
         }
     }
 }

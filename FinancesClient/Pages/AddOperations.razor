@@ -1,9 +1,8 @@
 ﻿@page "/addoperations"
 
-@using Microsoft.Extensions.Configuration
-@using System.Net.Http;
+@using FinancesClient.Services 
 @using FinancesClient.Data
-@inject IConfiguration Configuration
+@inject IFinancesService FinancesService
 
 <h1>Add Operations</h1>
 
@@ -21,7 +20,7 @@
 <br />
 <button @onclick="AddOperationToPOSTList">Add To List</button>
 
-@if (POSTList != null)
+@if (POSTList.Count == 0)
 {
     <p>Operations to add:</p>
     <OutputTable Operations="@POSTList" />
@@ -32,15 +31,12 @@
 
 @code {
     private List<FinancialOperation> POSTList;
-    private HttpClient Http { get; set; } = new HttpClient();
     private DateTime date;
     private string type;
     private decimal balanceChange;
 
     protected override async Task OnInitializedAsync()
     {
-        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["ListOfOperations"]);
-        Http.BaseAddress = uri;
         POSTList = new List<FinancialOperation>();
     }
 
@@ -49,8 +45,8 @@
         POSTList.Add(new FinancialOperation { BalanceChange = balanceChange, Date = date, Type = type });
     }
 
-    private async Task POSTOperations()
+    private async void POSTOperations()
     {
-        var response = await Http.PostAsJsonAsync<List<FinancialOperation>>("", POSTList);
+        await FinancesService.AddOperations(POSTList);
     }
 }

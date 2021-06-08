@@ -1,9 +1,9 @@
 ﻿@page "/expenses"
 
 @using FinancesClient.Data
-@using Microsoft.Extensions.Configuration
-@using System.Net.Http;
-@inject IConfiguration Configuration
+@using FinancesClient.Services
+
+@inject IFinancesService FinancesService
 
 <h1>All expenses</h1>
 
@@ -13,21 +13,20 @@
 }
 else
 {
-    <OutputTable Operations="@operations"/>
+    <OutputTable Operations="@operations" />
 }
 
 @code {
     private List<FinancialOperation> operations;
-    private HttpClient Http { get; set; } = new HttpClient();
 
     protected override async Task OnInitializedAsync()
     {
-        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllExpenses")["Uri"]);
-        Http.BaseAddress = uri;
-        HttpResponseMessage response = await Http.GetAsync("");
-        if (response.IsSuccessStatusCode)
+        try
         {
-            operations = response.Content.ReadAsAsync<List<FinancialOperation>>().Result;
+            operations = await FinancesService.GetExpenses();
+        }
+        catch (Exception)
+        {
         }
     }
 }

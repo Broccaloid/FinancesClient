@@ -1,4 +1,5 @@
 using FinancesClient.Data;
+using FinancesClient.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace FinancesClient
@@ -26,6 +28,10 @@ namespace FinancesClient
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddHttpClient<IFinancesService, FinancesService>(client =>
+            {
+                client.BaseAddress = new Uri(Configuration.GetSection("Api")["ApiUri"]);
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
