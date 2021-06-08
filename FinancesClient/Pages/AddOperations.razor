@@ -1,0 +1,56 @@
+﻿@page "/addoperations"
+
+@using Microsoft.Extensions.Configuration
+@using System.Net.Http;
+@using FinancesClient.Data
+@inject IConfiguration Configuration
+
+<h1>Add Operations</h1>
+
+<h3>Plese, enter data for an operation</h3>
+<br />
+<p>Date</p>
+<input @bind="@date" type="date" />
+<br />
+<p>Type</p>
+<input @bind="@type" />
+<br />
+<p>Balance Change</p>
+<input @bind="@balanceChange" />
+<br />
+<br />
+<button @onclick="AddOperationToPOSTList">Add To List</button>
+
+@if (POSTList != null)
+{
+    <p>Operations to add:</p>
+    <OutputTable Operations="@POSTList" />
+    <br />
+    <br />
+    <button @onclick="POSTOperations">Save All Operations</button>
+}
+
+@code {
+    private List<FinancialOperation> POSTList;
+    private HttpClient Http { get; set; } = new HttpClient();
+    private DateTime date;
+    private string type;
+    private decimal balanceChange;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(Configuration.GetSection("Api")["ApiUri"] + Configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["ListOfOperations"]);
+        Http.BaseAddress = uri;
+        POSTList = new List<FinancialOperation>();
+    }
+
+    private void AddOperationToPOSTList()
+    {
+        POSTList.Add(new FinancialOperation { BalanceChange = balanceChange, Date = date, Type = type });
+    }
+
+    private async Task POSTOperations()
+    {
+        var response = await Http.PostAsJsonAsync<List<FinancialOperation>>("", POSTList);
+    }
+}

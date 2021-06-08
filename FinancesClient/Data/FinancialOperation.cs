@@ -7,7 +7,7 @@ namespace FinancesClient.Data
 {
     public class FinancialOperation
     {
-        public int? Id { get; set; } = null;
+        public int Id { get; set; }
         public decimal BalanceChange { get; set; }
         public string Type { get; set; }
         public DateTime Date { get; set; }
