@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinancesClient.Services
 {
-    interface IFinancesService
+    public interface IFinancesService
     {
         public Task<List<FinancialOperation>> GetAllOperations();
         public Task<List<FinancialOperation>> GetExpenses();

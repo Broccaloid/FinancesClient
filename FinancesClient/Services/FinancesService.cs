@@ -1,5 +1,6 @@
 ﻿using FinancesClient.Data;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,10 @@ namespace FinancesClient.Services
     {
         private HttpClient client;
         private IConfiguration configuration;
-        public FinancesService(HttpClient client, IConfiguration configuration)
+        private ILogger logger;
+        public FinancesService(HttpClient client, IConfiguration configuration, ILogger<FinancesService> logger)
         {
+            this.logger = logger;
             this.configuration = configuration;
             this.client = client;
         }
@@ -24,6 +27,7 @@ namespace FinancesClient.Services
             var response = await client.PostAsJsonAsync<List<FinancialOperation>>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["ListOfOperations"], operations);
             if (!response.IsSuccessStatusCode)
             {
+                logger.LogWarning("Error by adding operations");
                 throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
@@ -33,6 +37,7 @@ namespace FinancesClient.Services
             var response = await client.PutAsJsonAsync<FinancialOperation>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"], operation);
             if (!response.IsSuccessStatusCode)
             {
+                logger.LogWarning("Error by changing operation");
                 throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
@@ -48,6 +53,7 @@ namespace FinancesClient.Services
             var response = await client.SendAsync(request);
             if (response.StatusCode != System.Net.HttpStatusCode.NoContent)
             {
+                logger.LogWarning("Error by deleting operation");
                 throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
@@ -62,6 +68,7 @@ namespace FinancesClient.Services
             }
             else
             {
+                logger.LogWarning("No operations were found");
                 throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
@@ -76,6 +83,7 @@ namespace FinancesClient.Services
             }
             else
             {
+                logger.LogWarning("No operations were found");
                 throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
@@ -89,6 +97,7 @@ namespace FinancesClient.Services
             }
             else
             {
+                logger.LogWarning("No operations were found");
                 throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
@@ -101,6 +110,7 @@ namespace FinancesClient.Services
             }
             else
             {
+                logger.LogWarning("No operations were found");
                 throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
@@ -114,6 +124,7 @@ namespace FinancesClient.Services
             }
             else
             {
+                logger.LogWarning("No operations were found");
                 throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }

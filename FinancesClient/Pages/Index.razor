@@ -14,6 +14,7 @@
 }
 else if (operationToChange != null)
 {
+<div class="change">
     <h3>Please, enter new data for the operation</h3>
     <p>Date</p>
     <input @bind="@operationToChange.Date" type="date" />
@@ -28,6 +29,7 @@ else if (operationToChange != null)
     <br />
     <br />
     <button @onclick="ChangeOperation">Save changes</button>
+</div> 
 }
 else
 {

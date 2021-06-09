@@ -22,16 +22,18 @@
 <input @bind="@balanceChange" />
 <br />
 <br />
-<button @onclick="AddOperationToPOSTList">Add To List</button>
+<button class="add-button" @onclick="AddOperationToPOSTList">Add To List</button>
 <br />
 
 @if (POSTList.Count != 0)
 {
+<div class="post-list">
     <p>Operations to add:</p>
     <OutputTable Operations="@POSTList" />
     <br />
     <br />
     <button @onclick="POSTOperations">Save All Operations</button>
+</div>
 }
 
 @code {

@@ -1,7 +1,9 @@
 ﻿@using FinancesClient.Data
 
-<p>Total income = @Statement.TotalIncome</p>
-<p>Total expenses = @Statement.TotalExpense</p>
+<p>
+    Total income = @Statement.TotalIncome <br />
+    Total expenses = @Statement.TotalExpense
+</p>
 <table class="table">
     <thead>
         <tr>
@@ -13,10 +15,10 @@
     <tbody>
         @foreach (var operation in Statement.FinancialOperations)
         {
-            <tr>
-                <td>@operation.Date.ToShortDateString()</td>
-                <td>@operation.Type</td>
-                <td>@operation.BalanceChange</td>
+            <tr class="data-output">
+                <td class="date">@operation.Date.ToShortDateString()</td>
+                <td class="type">@operation.Type</td>
+                <td class="balance-change">@operation.BalanceChange</td>
             </tr>
         }
     </tbody>
