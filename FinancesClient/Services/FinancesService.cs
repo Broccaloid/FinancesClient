@@ -1,4 +1,6 @@
 ﻿using FinancesClient.Data;
+using FinancesClient.Services.UseCases;
+using FinancesClient.Services.UseCases.Implementations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -22,111 +24,47 @@ namespace FinancesClient.Services
             this.configuration = configuration;
             this.client = client;
         }
-        public async Task AddOperations(List<FinancialOperation> operations)
+        public INoReturnUseCase AddOperations(List<FinancialOperation> operations)
         {
-            var response = await client.PostAsJsonAsync<List<FinancialOperation>>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["ListOfOperations"], operations);
-            if (!response.IsSuccessStatusCode)
-            {
-                logger.LogWarning("Error by adding operations");
-                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
-            }
+            return new AddOperationsUseCase(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["ListOfOperations"], client, operations);
         }
 
-        public async Task ChangeOperation(FinancialOperation operation)
+        public INoReturnUseCase ChangeOperation(FinancialOperation operation)
         {
-            var response = await client.PutAsJsonAsync<FinancialOperation>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"], operation);
-            if (!response.IsSuccessStatusCode)
-            {
-                logger.LogWarning("Error by changing operation");
-                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
-            }
+            return new ChangeOperationUseCase(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"], client, operation);
         }
 
-        public async Task DeleteOperation(FinancialOperation operation)
+        public INoReturnUseCase DeleteOperation(FinancialOperation operation)
         {
-            HttpRequestMessage request = new HttpRequestMessage
-            {
-                Content = new StringContent(JsonSerializer.Serialize(operation), Encoding.UTF8, "application/json"),
-                Method = HttpMethod.Delete,
-                RequestUri = new Uri(configuration.GetSection("Api")["ApiUri"] + configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"])
-            };
-            var response = await client.SendAsync(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.NoContent)
-            {
-                logger.LogWarning("Error by deleting operation");
-                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
-            }
+            return new DeleteOperationUseCase(configuration.GetSection("Api")["ApiUri"] + configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"], client, operation);
         }
 
-        public async Task<FinancialStatement> GetDailyFinancialStatement(DateTime date)
+        public IFinancialStatementUseCase GetDailyFinancialStatement(DateTime date)
         {
             var dateParameters = configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("DailyFinancialStatement").GetSection("Parameters");
-            HttpResponseMessage response = await client.GetAsync($"{configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("DailyFinancialStatement")["Uri"]}?{dateParameters["Date"]}{date}");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsAsync<Data.FinancialStatement>();
-            }
-            else
-            {
-                logger.LogWarning("No operations were found");
-                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
-            }
+            return new GetFinancialStatementUseCase($"{configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("DailyFinancialStatement")["Uri"]}" +
+                $"?{dateParameters["Date"]}{date:MM.dd.yyyy}", client); 
         }
 
-        public async Task<FinancialStatement> GetFinancialStatement(DateTime dateStart, DateTime dateEnd)
+        public IFinancialStatementUseCase GetFinancialStatement(DateTime dateStart, DateTime dateEnd)
         {
             var dateRangeParameters = configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("FinancialStatement").GetSection("Parameters");
-            HttpResponseMessage response = await client.GetAsync($"{configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("FinancialStatement")["Uri"]}?{dateRangeParameters["DateStart"]}{dateStart}&{dateRangeParameters["DateEnd"]}{dateEnd}");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsAsync<Data.FinancialStatement>();
-            }
-            else
-            {
-                logger.LogWarning("No operations were found");
-                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
-            }
+            return new GetFinancialStatementUseCase($"{configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("FinancialStatement")["Uri"]}" +
+                $"?{dateRangeParameters["DateStart"]}{dateStart:MM.dd.yyyy}&{dateRangeParameters["DateEnd"]}{dateEnd:MM.dd.yyyy}", client);
         }
 
-        public async Task<List<FinancialOperation>> GetExpenses()
+        public IOperationsUseCase GetExpenses()
         {
-            HttpResponseMessage response = await client.GetAsync(configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllExpenses")["Uri"]);
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsAsync<List<FinancialOperation>>();
-            }
-            else
-            {
-                logger.LogWarning("No operations were found");
-                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
-            }
+            return new GetOperations(configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllExpenses")["Uri"], client);
         }
-        public async Task<List<FinancialOperation>> GetIncomes()
+        public IOperationsUseCase GetIncomes()
         {
-            HttpResponseMessage response = await client.GetAsync(configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllIncomes")["Uri"]);
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsAsync<List<FinancialOperation>>();
-            }
-            else
-            {
-                logger.LogWarning("No operations were found");
-                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
-            }
+            return new GetOperations(configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllIncomes")["Uri"], client);
         }
 
-        public async Task<List<FinancialOperation>> GetAllOperations()
+        public IOperationsUseCase GetAllOperations()
         {
-            HttpResponseMessage response = await client.GetAsync("");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsAsync<List<FinancialOperation>>();
-            }
-            else
-            {
-                logger.LogWarning("No operations were found");
-                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
-            }
+            return new GetOperations("", client);
         }
     }
 }

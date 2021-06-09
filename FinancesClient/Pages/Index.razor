@@ -2,9 +2,11 @@
 
 @using FinancesClient.Data
 @using FinancesClient.Services
+@using Microsoft.Extensions.Logging
 
 @inject IFinancesService FinancesService
 @inject IJSRuntime JsRuntime
+@inject ILogger<Index> Logger
 
 <h1>All operations</h1>
 
@@ -44,11 +46,12 @@ else
     {
         try
         {
-            operations = await FinancesService.GetAllOperations();
+            operations = await FinancesService.GetAllOperations().Launch();
         }
         catch (Exception ex)
         {
-            await Alert(ex.Message);
+            Logger.LogWarning("No operations were found");
+            operations = new List<FinancialOperation>();
         }
     }
 
@@ -61,11 +64,12 @@ else
     {
         try
         {
-            await FinancesService.ChangeOperation(operationToChange);
+            await FinancesService.ChangeOperation(operationToChange).Launch();
             operationToChange = null;
         }
         catch (Exception ex)
         {
+            Logger.LogWarning($"Error by changing operation: {ex.Message}");
             await Alert(ex.Message);
         }
     }
@@ -74,11 +78,12 @@ else
     {
         try
         {
-            await FinancesService.DeleteOperation(operation);
+            await FinancesService.DeleteOperation(operation).Launch();
             operations.Remove(operation);
         }
         catch (Exception ex)
         {
+            Logger.LogWarning("Error by deleting operation");
             await Alert(ex.Message);
         }
     }

@@ -9,6 +9,7 @@ using System;
 using Microsoft.JSInterop;
 using Microsoft.Extensions.DependencyInjection;
 using FinancesClient.Pages;
+using Microsoft.Extensions.Logging;
 
 namespace FinancesClient.Tests
 {
@@ -20,9 +21,11 @@ namespace FinancesClient.Tests
             // Arrange
             var mockFinancesService = new Mock<IFinancesService>();
             var mockJSRuntime = new Mock<IJSRuntime>();
+            var mockLogger = new Mock<ILogger<Pages.AddOperations>>();
 
             Services.AddSingleton<IJSRuntime>(mockJSRuntime.Object);
             Services.AddSingleton<IFinancesService>(mockFinancesService.Object);
+            Services.AddSingleton<ILogger<Pages.AddOperations>>(mockLogger.Object);
 
             // Act
             var cut = RenderComponent<AddOperations>();

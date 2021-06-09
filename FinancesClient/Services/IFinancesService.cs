@@ -1,4 +1,6 @@
 ﻿using FinancesClient.Data;
+using FinancesClient.Services.UseCases;
+using FinancesClient.Services.UseCases.Implementations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,13 +10,13 @@ namespace FinancesClient.Services
 {
     public interface IFinancesService
     {
-        public Task<List<FinancialOperation>> GetAllOperations();
-        public Task<List<FinancialOperation>> GetExpenses();
-        public Task<List<FinancialOperation>> GetIncomes();
-        public Task AddOperations(List<FinancialOperation> operations);
-        public Task<FinancialStatement> GetFinancialStatement(DateTime dateStart, DateTime dateEnd);
-        public Task<FinancialStatement> GetDailyFinancialStatement(DateTime date);
-        public Task DeleteOperation(FinancialOperation operation);
-        public Task ChangeOperation(FinancialOperation operation);
+        public IOperationsUseCase GetAllOperations();
+        public IOperationsUseCase GetExpenses();
+        public IOperationsUseCase GetIncomes();
+        public IFinancialStatementUseCase GetFinancialStatement(DateTime dateStart, DateTime dateEnd);
+        public IFinancialStatementUseCase GetDailyFinancialStatement(DateTime date);
+        public INoReturnUseCase AddOperations(List<FinancialOperation> operations);
+        public INoReturnUseCase DeleteOperation(FinancialOperation operation);
+        public INoReturnUseCase ChangeOperation(FinancialOperation operation);
     }
 }

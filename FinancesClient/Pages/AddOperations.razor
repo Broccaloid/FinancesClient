@@ -2,9 +2,11 @@
 
 @using FinancesClient.Services
 @using FinancesClient.Data
+@using Microsoft.Extensions.Logging
 
 @inject IFinancesService FinancesService
 @inject IJSRuntime JsRuntime
+@inject ILogger<AddOperations> Logger
 
 <h1>Add Operations</h1>
 
@@ -56,11 +58,12 @@
     {
         try
         {
-            await FinancesService.AddOperations(POSTList);
+            await FinancesService.AddOperations(POSTList).Launch();
             POSTList = new List<FinancialOperation>();
         }
         catch (Exception ex)
         {
+            Logger.LogWarning($"Error by adding operations: {ex.Message}");
             await Alert(ex.Message);
         }
     }

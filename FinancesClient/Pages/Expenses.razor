@@ -2,9 +2,11 @@
 
 @using FinancesClient.Data
 @using FinancesClient.Services
+@using Microsoft.Extensions.Logging
 
 @inject IFinancesService FinancesService
 @inject IJSRuntime JsRuntime
+@inject ILogger<Expenses> Logger
 
 <h1>All expenses</h1>
 
@@ -24,11 +26,12 @@ else
     {
         try
         {
-            operations = await FinancesService.GetExpenses();
+            operations = await FinancesService.GetExpenses().Launch();
         }
         catch (Exception ex)
         {
-            await Alert(ex.Message);
+            Logger.LogWarning("No operations were found");
+            operations = new List<FinancialOperation>();
         }
     }
 

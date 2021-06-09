@@ -10,6 +10,9 @@ using System;
 using Microsoft.JSInterop;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using FinancesClient.Services.UseCases;
+using Microsoft.Extensions.Logging;
+using FinancesClient.Services.UseCases.Implementations;
 
 namespace FinancesClient.Tests
 {
@@ -18,16 +21,30 @@ namespace FinancesClient.Tests
         private FinancialOperation Operation { get; set; }
         private Mock<IFinancesService> MockFinancesService { get; set; }
         private Mock<IJSRuntime> MockJSRuntime { get; set; }
+        private Mock<INoReturnUseCase> MockNoReturnUseCase { get; set; }
+        private Mock<ILogger<Pages.Index>> MockLogger { get; set; }
+
+        private Mock<IOperationsUseCase> MockOperationsUseCase { get; set; }
         public IndexTests()
         {
             Operation = new FinancialOperation() { Id = 1, BalanceChange = 1000, Date = new DateTime(2001, 11, 29), Type = "type" };
+
+            MockNoReturnUseCase = new Mock<INoReturnUseCase>();
+            MockNoReturnUseCase.Setup(mock => mock.Launch());
+
+            MockOperationsUseCase = new Mock<IOperationsUseCase>();
+            MockOperationsUseCase.Setup(mock => mock.Launch()).Returns(Task.FromResult(new List<FinancialOperation>() { Operation }));
+
             MockFinancesService = new Mock<IFinancesService>();
-            MockFinancesService.Setup(mock => mock.GetAllOperations()).Returns(Task.FromResult(new List<FinancialOperation>() { Operation }));
-            MockFinancesService.Setup(mock => mock.ChangeOperation(Operation));
-            MockFinancesService.Setup(mock => mock.DeleteOperation(Operation));
+            MockFinancesService.Setup(mock => mock.ChangeOperation(Operation)).Returns(MockNoReturnUseCase.Object);
+            MockFinancesService.Setup(mock => mock.DeleteOperation(Operation)).Returns(MockNoReturnUseCase.Object);
+            MockFinancesService.Setup(mock => mock.GetAllOperations()).Returns(MockOperationsUseCase.Object);
 
             MockJSRuntime = new Mock<IJSRuntime>();
 
+            MockLogger = new Mock<ILogger<Pages.Index>>();
+
+            Services.AddSingleton<ILogger<Pages.Index>>(MockLogger.Object);
             Services.AddSingleton<IJSRuntime>(MockJSRuntime.Object);
             Services.AddSingleton<IFinancesService>(MockFinancesService.Object);
         }
@@ -36,7 +53,7 @@ namespace FinancesClient.Tests
         public void ChangeButtonClickOpensChangeSection()
         {
             // Arrange
-
+            
             // Act
             var cut = RenderComponent<Pages.Index>();
             var addButton = cut.Find("#change-button");

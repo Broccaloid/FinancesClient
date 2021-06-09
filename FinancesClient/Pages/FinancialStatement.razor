@@ -1,7 +1,9 @@
 ﻿@page "/financialstatement"
 
 @using FinancesClient.Services
+@using Microsoft.Extensions.Logging
 
+@inject ILogger<FinancialStatement> Logger
 @inject IJSRuntime JsRuntime
 @inject IFinancesService FinancesService
 
@@ -35,10 +37,11 @@ else
     {
         try
         {
-            statement = await FinancesService.GetFinancialStatement(dateStart, dateEnd);
+            statement = await FinancesService.GetFinancialStatement(dateStart, dateEnd).Launch();
         }
         catch (Exception ex)
         {
+            Logger.LogWarning("No operations were found");
             await Alert(ex.Message);
         }
     }
