@@ -1,24 +1,29 @@
 ﻿@page "/addoperations"
 
-@using FinancesClient.Services 
+@using FinancesClient.Services
 @using FinancesClient.Data
+
 @inject IFinancesService FinancesService
+@inject IJSRuntime JsRuntime
 
 <h1>Add Operations</h1>
 
-<h3>Plese, enter data for an operation</h3>
+<h3>Please, enter data for an operation</h3>
 <br />
 <p>Date</p>
 <input @bind="@date" type="date" />
 <br />
+<br />
 <p>Type</p>
 <input @bind="@type" />
+<br />
 <br />
 <p>Balance Change</p>
 <input @bind="@balanceChange" />
 <br />
 <br />
 <button @onclick="AddOperationToPOSTList">Add To List</button>
+<br />
 
 @if (POSTList.Count != 0)
 {
@@ -45,9 +50,21 @@
         POSTList.Add(new FinancialOperation { BalanceChange = balanceChange, Date = date, Type = type });
     }
 
-    private async void POSTOperations()
+    private async Task POSTOperations()
     {
-        await FinancesService.AddOperations(POSTList);
-        POSTList = new List<FinancialOperation>();
+        try
+        {
+            await FinancesService.AddOperations(POSTList);
+            POSTList = new List<FinancialOperation>();
+        }
+        catch (Exception ex)
+        {
+            await Alert(ex.Message);
+        }
+    }
+
+    private async Task Alert(string message)
+    {
+        await JsRuntime.InvokeVoidAsync("Alert", message);
     }
 }

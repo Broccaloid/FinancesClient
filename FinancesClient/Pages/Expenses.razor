@@ -4,6 +4,7 @@
 @using FinancesClient.Services
 
 @inject IFinancesService FinancesService
+@inject IJSRuntime JsRuntime
 
 <h1>All expenses</h1>
 
@@ -25,8 +26,14 @@ else
         {
             operations = await FinancesService.GetExpenses();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            await Alert(ex.Message);
         }
+    }
+
+    private async Task Alert(string message)
+    {
+        await JsRuntime.InvokeVoidAsync("Alert", message);
     }
 }

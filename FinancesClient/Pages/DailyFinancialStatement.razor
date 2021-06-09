@@ -1,7 +1,9 @@
 ﻿@page "/dailyfinancialstatement"
 
 @using FinancesClient.Services
-@inject IFinancesService FinancesService 
+
+@inject IFinancesService FinancesService
+@inject IJSRuntime JsRuntime
 
 <h1>Daily Financial Statement</h1>
 
@@ -30,8 +32,14 @@ else
         {
             statement = await FinancesService.GetDailyFinancialStatement(date);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            await Alert(ex.Message);
         }
+    }
+
+    private async Task Alert(string message)
+    {
+        await JsRuntime.InvokeVoidAsync("Alert", message);
     }
 }

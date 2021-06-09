@@ -4,12 +4,30 @@
 @using FinancesClient.Services
 
 @inject IFinancesService FinancesService
+@inject IJSRuntime JsRuntime
 
 <h1>All operations</h1>
 
 @if (operations == null)
 {
     <p><em>Loading...</em></p>
+}
+else if (operationToChange != null)
+{
+    <h3>Please, enter new data for the operation</h3>
+    <p>Date</p>
+    <input @bind="@operationToChange.Date" type="date" />
+    <br />
+    <br />
+    <p>Type</p>
+    <input @bind="@operationToChange.Type" />
+    <br />
+    <br />
+    <p>Balance Change</p>
+    <input @bind="@operationToChange.BalanceChange" />
+    <br />
+    <br />
+    <button @onclick="ChangeOperation">Save changes</button>
 }
 else
 {
@@ -26,8 +44,9 @@ else
         {
             operations = await FinancesService.GetAllOperations();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            await Alert(ex.Message);
         }
     }
 
@@ -38,12 +57,32 @@ else
 
     private async Task ChangeOperation()
     {
-        await FinancesService.ChangeOperation(operationToChange);
-        operationToChange = null;
+        try
+        {
+            await FinancesService.ChangeOperation(operationToChange);
+            operationToChange = null;
+        }
+        catch (Exception ex)
+        {
+            await Alert(ex.Message);
+        }
     }
 
     private async Task DeleteOperation(FinancialOperation operation)
     {
-        await FinancesService.DeleteOperation(operation);
+        try
+        {
+            await FinancesService.DeleteOperation(operation);
+            operations.Remove(operation);
+        }
+        catch (Exception ex)
+        {
+            await Alert(ex.Message);
+        }
+    }
+
+    private async Task Alert(string message)
+    {
+        await JsRuntime.InvokeVoidAsync("Alert", message);
     }
 }

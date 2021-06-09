@@ -22,11 +22,19 @@ namespace FinancesClient.Services
         public async Task AddOperations(List<FinancialOperation> operations)
         {
             var response = await client.PostAsJsonAsync<List<FinancialOperation>>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["ListOfOperations"], operations);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
+            }
         }
 
         public async Task ChangeOperation(FinancialOperation operation)
         {
-            await client.PutAsJsonAsync<FinancialOperation>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"], operation);
+            var response = await client.PutAsJsonAsync<FinancialOperation>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"], operation);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
+            }
         }
 
         public async Task DeleteOperation(FinancialOperation operation)
@@ -37,7 +45,11 @@ namespace FinancesClient.Services
                 Method = HttpMethod.Delete,
                 RequestUri = new Uri(configuration.GetSection("Api")["ApiUri"] + configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"])
             };
-            await client.SendAsync(request);
+            var response = await client.SendAsync(request);
+            if (response.StatusCode != System.Net.HttpStatusCode.NoContent)
+            {
+                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
+            }
         }
 
         public async Task<FinancialStatement> GetDailyFinancialStatement(DateTime date)
@@ -50,7 +62,7 @@ namespace FinancesClient.Services
             }
             else
             {
-                throw new Exception();
+                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
 
@@ -64,7 +76,7 @@ namespace FinancesClient.Services
             }
             else
             {
-                throw new Exception();
+                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
 
@@ -77,7 +89,7 @@ namespace FinancesClient.Services
             }
             else
             {
-                throw new Exception();
+                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
         public async Task<List<FinancialOperation>> GetIncomes()
@@ -89,7 +101,7 @@ namespace FinancesClient.Services
             }
             else
             {
-                throw new Exception();
+                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
 
@@ -102,7 +114,7 @@ namespace FinancesClient.Services
             }
             else
             {
-                throw new Exception();
+                throw new Exception(response.StatusCode.ToString() + " " + response.ReasonPhrase);
             }
         }
     }

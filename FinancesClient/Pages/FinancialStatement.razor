@@ -2,6 +2,7 @@
 
 @using FinancesClient.Services
 
+@inject IJSRuntime JsRuntime
 @inject IFinancesService FinancesService
 
 <h1>Financial Statement</h1>
@@ -13,9 +14,11 @@
     <p>Date start</p>
     <input @bind="@dateStart" type="date" />
     <br />
+    <br />
     <p>Date end</p>
     <input @bind="@dateEnd" type="date" />
-    <br /><br />
+    <br />
+    <br />
     <button @onclick="GetFinancialStatement">Get Financial Statement</button>
 }
 else
@@ -34,8 +37,14 @@ else
         {
             statement = await FinancesService.GetFinancialStatement(dateStart, dateEnd);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            await Alert(ex.Message);
         }
+    }
+
+    private async Task Alert(string message)
+    {
+        await JsRuntime.InvokeVoidAsync("Alert", message);
     }
 }
