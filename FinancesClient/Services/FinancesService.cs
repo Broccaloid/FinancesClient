@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace FinancesClient.Services
@@ -22,14 +24,20 @@ namespace FinancesClient.Services
             var response = await client.PostAsJsonAsync<List<FinancialOperation>>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["ListOfOperations"], operations);
         }
 
-        public void ChangeOperation()
+        public async Task ChangeOperation(FinancialOperation operation)
         {
-            throw new NotImplementedException();
+            await client.PutAsJsonAsync<FinancialOperation>(configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"], operation);
         }
 
-        public void DeleteOperations()
+        public async Task DeleteOperation(FinancialOperation operation)
         {
-            throw new NotImplementedException();
+            HttpRequestMessage request = new HttpRequestMessage
+            {
+                Content = new StringContent(JsonSerializer.Serialize(operation), Encoding.UTF8, "application/json"),
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri(configuration.GetSection("Api")["ApiUri"] + configuration.GetSection("Api").GetSection("Methods").GetSection("NonGET").GetSection("Uri")["Operation"])
+            };
+            await client.SendAsync(request);
         }
 
         public async Task<FinancialStatement> GetDailyFinancialStatement(DateTime date)
@@ -38,7 +46,7 @@ namespace FinancesClient.Services
             HttpResponseMessage response = await client.GetAsync($"{configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("DailyFinancialStatement")["Uri"]}?{dateParameters["Date"]}{date}");
             if (response.IsSuccessStatusCode)
             {
-                return response.Content.ReadAsAsync<Data.FinancialStatement>().Result;
+                return await response.Content.ReadAsAsync<Data.FinancialStatement>();
             }
             else
             {
@@ -52,7 +60,7 @@ namespace FinancesClient.Services
             HttpResponseMessage response = await client.GetAsync($"{configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("FinancialStatement")["Uri"]}?{dateRangeParameters["DateStart"]}{dateStart}&{dateRangeParameters["DateEnd"]}{dateEnd}");
             if (response.IsSuccessStatusCode)
             {
-                return response.Content.ReadAsAsync<Data.FinancialStatement>().Result;
+                return await response.Content.ReadAsAsync<Data.FinancialStatement>();
             }
             else
             {
@@ -65,7 +73,7 @@ namespace FinancesClient.Services
             HttpResponseMessage response = await client.GetAsync(configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllExpenses")["Uri"]);
             if (response.IsSuccessStatusCode)
             {
-                return response.Content.ReadAsAsync<List<FinancialOperation>>().Result;
+                return await response.Content.ReadAsAsync<List<FinancialOperation>>();
             }
             else
             {
@@ -77,7 +85,20 @@ namespace FinancesClient.Services
             HttpResponseMessage response = await client.GetAsync(configuration.GetSection("Api").GetSection("Methods").GetSection("GET").GetSection("AllIncomes")["Uri"]);
             if (response.IsSuccessStatusCode)
             {
-                return response.Content.ReadAsAsync<List<FinancialOperation>>().Result;
+                return await response.Content.ReadAsAsync<List<FinancialOperation>>();
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
+        public async Task<List<FinancialOperation>> GetAllOperations()
+        {
+            HttpResponseMessage response = await client.GetAsync("");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsAsync<List<FinancialOperation>>();
             }
             else
             {

@@ -1,7 +1,49 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+@using FinancesClient.Data
+@using FinancesClient.Services
 
-Welcome to your new app.
+@inject IFinancesService FinancesService
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<h1>All operations</h1>
+
+@if (operations == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ChangableTable Operations="@operations" OnClickChange="SetOperationToChange" OnClickDelete="DeleteOperation" />
+}
+
+@code {
+    private List<FinancialOperation> operations;
+    private FinancialOperation operationToChange;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            operations = await FinancesService.GetAllOperations();
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    private void SetOperationToChange(FinancialOperation operation)
+    {
+        operationToChange = operation;
+    }
+
+    private async Task ChangeOperation()
+    {
+        await FinancesService.ChangeOperation(operationToChange);
+        operationToChange = null;
+    }
+
+    private async Task DeleteOperation(FinancialOperation operation)
+    {
+        await FinancesService.DeleteOperation(operation);
+    }
+}

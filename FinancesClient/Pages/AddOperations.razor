@@ -20,7 +20,7 @@
 <br />
 <button @onclick="AddOperationToPOSTList">Add To List</button>
 
-@if (POSTList.Count == 0)
+@if (POSTList.Count != 0)
 {
     <p>Operations to add:</p>
     <OutputTable Operations="@POSTList" />
@@ -48,5 +48,6 @@
     private async void POSTOperations()
     {
         await FinancesService.AddOperations(POSTList);
+        POSTList = new List<FinancialOperation>();
     }
 }
